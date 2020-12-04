@@ -6,14 +6,30 @@ function print_info() {
     echo -e "\e[36mINFO: ${1}\e[m"
 }
 
-if [ -n "${REQUIREMENTS}" ] && [ -f "${GITHUB_WORKSPACE}/${REQUIREMENTS}" ]; then
-    pip install -r "${GITHUB_WORKSPACE}/${REQUIREMENTS}"
-else
-    REQUIREMENTS="${GITHUB_WORKSPACE}/requirements.txt"
-    if [ -f "${REQUIREMENTS}" ]; then
-        pip install -r "${REQUIREMENTS}"
-    fi
-fi
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-$MINICONDA_OS-x86_64.sh -O miniconda.sh
+bash miniconda.sh -b -p "$HOME"/miniconda
+export PATH="$HOME/miniconda/bin:$PATH"
+source "$HOME"/miniconda/etc/profile.d/conda.sh
+
+# set configs
+conda config --set always_yes yes --set changeps1 no
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+conda config --append channels jrgarrahan # temporary lume-model fix
+conda install conda-build anaconda-client
+conda update -q conda conda-build
+
+# log info for debugging
+conda info -a
+
+# create build & add to channel
+conda build -q conda-recipe --python=3.7 --output-folder bld-dir
+conda config --add channels "file://`pwd`/bld-dir"
+
+# create env
+conda create -q -n test-environment python=3.7 --file dev-requirements.txt
+conda activate test-environment
+conda install --file docs-requirements.txt
 
 if [ -n "${CUSTOM_DOMAIN}" ]; then
     print_info "Setting custom domain for github pages"
