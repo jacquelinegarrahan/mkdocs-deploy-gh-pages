@@ -6,7 +6,7 @@ function print_info() {
     echo -e "\e[36mINFO: ${1}\e[m"
 }
 
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-$MINICONDA_OS-x86_64.sh -O miniconda.sh
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-linux-x86_64.sh -O miniconda.sh
 bash miniconda.sh -b -p "$HOME"/miniconda
 export PATH="$HOME/miniconda/bin:$PATH"
 source "$HOME"/miniconda/etc/profile.d/conda.sh
